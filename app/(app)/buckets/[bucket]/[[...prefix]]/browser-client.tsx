@@ -27,15 +27,25 @@ export function UploadButton({ bucket, prefix }: { bucket: string; prefix: strin
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLLabelElement>) {
+    if ((e.key === 'Enter' || e.key === ' ') && !busy) {
+      e.preventDefault()
+      inputRef.current?.click()
+    }
+  }
+
   // Use a <label> wrapping the file input so the browser natively opens the
   // file picker on click — this works reliably in both production and in Playwright's
   // headless Chromium (where programmatic input.click() from an onClick handler does
   // not always trigger the filechooser event).
+  // tabIndex={0} + onKeyDown make it keyboard-operable (Enter/Space) for a11y.
   return (
     <label
       role="button"
+      tabIndex={0}
       aria-disabled={busy}
       onClick={busy ? (e) => e.preventDefault() : undefined}
+      onKeyDown={handleKeyDown}
       className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white cursor-pointer select-none aria-disabled:opacity-50 dark:bg-white dark:text-black"
     >
       <input ref={inputRef} type="file" aria-hidden="true" className="sr-only" onChange={onPick} />

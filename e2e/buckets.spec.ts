@@ -46,4 +46,9 @@ test('upload, download link, and delete an object', async ({ page }) => {
   page.on('dialog', (d) => d.accept())
   await page.locator('li', { hasText: 'hello.txt' }).getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText('hello.txt')).toHaveCount(0)
+
+  // Clean up: delete the bucket (now empty)
+  await page.goto('/buckets')
+  await page.locator('li', { hasText: bucket }).getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText(bucket, { exact: true })).toHaveCount(0)
 })
