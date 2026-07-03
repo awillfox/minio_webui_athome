@@ -44,12 +44,23 @@ mc admin config set mw api cors_allow_origin="https://<console-host>"
 mc admin service restart mw
 ```
 
+## Admin features & `mc` runtime dependency
+
+The Access Keys, Users, Policies, and Metrics pages shell out to the [MinIO Client (`mc`)](https://min.io/docs/minio/linux/reference/minio-mc.html) binary for admin operations. **`mc` must be on `PATH` on the host** — the console will fail at runtime for these pages if it is absent. On the deploy host, install it at `/usr/local/bin/mc`.
+
+| Page | Description |
+|------|-------------|
+| **Access Keys** (`/keys`) | List, create, and delete service-account access keys for the current user |
+| **Users** (`/users`) | List IAM users; create, delete, and attach/detach policies |
+| **Policies** (`/policies`) | List and inspect IAM policy documents |
+| **Metrics** (`/metrics`) | Server health, disk usage, and drive state from `mc admin info` |
+
 ## Architecture
 
 ```
 Browser ──HTTPS──▶ Next.js (app router, adapter-node)
-                     └─ /api/[...path] proxy (injects session creds)
-                          └─▶ MinIO (internal endpoint, SDK)
+                     └─ Server Actions (requireSession guard)
+                          └─▶ MinIO (internal endpoint) via S3 SDK / mc subprocess
                      └─ presigned URL redirect
                           └─▶ MinIO (public endpoint, browser direct)
 ```
@@ -57,4 +68,4 @@ Browser ──HTTPS──▶ Next.js (app router, adapter-node)
 - **Session**: encrypted httpOnly cookie (`SESSION_SECRET`). Credentials never touch the browser.
 - **Two endpoints**: `MINIO_INTERNAL_ENDPOINT` for server-side SDK calls; `MINIO_PUBLIC_ENDPOINT` for presigned URLs the browser opens directly.
 - **Phases 1–2 (complete)**: login, app shell, bucket browser, object browser with presigned upload/download, delete, new folder.
-- **Phases 3–5 (stub pages only)**: Access Keys, Users, Policies, Metrics — nav links resolve, full implementation deferred.
+- **Phases 3–5 (complete)**: Access Keys, Users, Policies, Metrics — fully implemented via `mc` subprocess driver.
