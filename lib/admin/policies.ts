@@ -1,6 +1,7 @@
 import { writeFile, unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import { runMc, ALIAS } from '@/lib/mc'
 import type { Creds } from '@/lib/session-crypto'
 
@@ -15,12 +16,13 @@ export async function listPolicies(session: Creds): Promise<Policy[]> {
 
 export async function getPolicy(session: Creds, name: string): Promise<unknown> {
   const [res] = await runMc(session, ['admin', 'policy', 'info', ALIAS, name])
-  return res.policyInfo?.Policy ?? null
+  return res?.policyInfo?.Policy ?? null
 }
 
 export async function createPolicy(session: Creds, name: string, document: string): Promise<void> {
-  // mc admin policy create needs the document in a file. Use a unique temp file per call.
-  const file = join(tmpdir(), `mw-policy-${encodeURIComponent(name)}-${process.pid}.json`)
+  // mc admin policy create needs the document in a file. Use a unique temp file per call
+  // (randomUUID, not pid — all concurrent requests share one Node process).
+  const file = join(tmpdir(), `mw-policy-${randomUUID()}.json`)
   await writeFile(file, document, 'utf8')
   try {
     await runMc(session, ['admin', 'policy', 'create', ALIAS, name, file])
