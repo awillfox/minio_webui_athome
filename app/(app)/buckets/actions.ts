@@ -17,8 +17,13 @@ export async function createBucketAction(_prev: { error: string | null }, formDa
   return { error: null }
 }
 
-export async function deleteBucketAction(formData: FormData) {
-  const name = String(formData.get('name') ?? '')
-  await deleteBucket(await requireSession(), name)
+export async function deleteBucketAction(name: string): Promise<{ error: string | null }> {
+  if (!name) return { error: 'Missing bucket name' }
+  try {
+    await deleteBucket(await requireSession(), name)
+  } catch (err) {
+    return { error: toUserMessage(err) }
+  }
   revalidatePath('/buckets')
+  return { error: null }
 }

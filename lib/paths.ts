@@ -1,6 +1,6 @@
 export function prefixFromSegments(segments?: string[]): string {
   if (!segments || segments.length === 0) return ''
-  return segments.map((s) => decodeURIComponent(s)).join('/') + '/'
+  return segments.join('/') + '/'
 }
 
 export function segmentsFromPrefix(prefix: string): string[] {

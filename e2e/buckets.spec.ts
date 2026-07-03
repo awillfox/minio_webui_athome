@@ -15,6 +15,7 @@ async function loginUI(page: Page) {
 
 test('login, create and delete a bucket', async ({ page }) => {
   await loginUI(page)
+  page.on('dialog', (d) => d.accept())
   const name = 'e2e-test-bucket-1' // deterministic; test cleans up at the end
   // ensure clean slate: if present, delete first
   if (await page.getByText(name, { exact: true }).count()) {

@@ -6,8 +6,7 @@ import { prefixFromSegments, breadcrumbs, displayName } from '@/lib/paths'
 import { ObjectRow, UploadButton, NewFolder } from './browser-client'
 
 export default async function ObjectBrowser({ params }: { params: Promise<{ bucket: string; prefix?: string[] }> }) {
-  const { bucket: rawBucket, prefix: segs } = await params
-  const bucket = decodeURIComponent(rawBucket)
+  const { bucket, prefix: segs } = await params
   const prefix = prefixFromSegments(segs)
   const session = await requireSession()
 

@@ -11,12 +11,15 @@ export function loadConfig(env: Env) {
     throw new Error('SESSION_SECRET is required and must be at least 32 characters')
   }
 
+  const cookieSecure = env.COOKIE_SECURE?.toLowerCase() !== 'false'
+
   return {
     internalEndpoint,
     publicEndpoint,
     sessionSecret,
     cookieName: 'mw_session',
     cookieMaxAge: 60 * 60 * 8,
+    cookieSecure,
   }
 }
 

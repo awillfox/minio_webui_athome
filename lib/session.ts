@@ -23,7 +23,7 @@ export async function setSessionCookie(creds: Creds): Promise<void> {
   store.set(config.cookieName, encryptSession(creds, config.sessionSecret), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: true,
+    secure: config.cookieSecure,
     path: '/',
     maxAge: config.cookieMaxAge,
   })
