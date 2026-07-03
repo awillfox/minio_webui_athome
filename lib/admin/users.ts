@@ -11,6 +11,7 @@ export async function listUsers(session: Creds): Promise<MinioUser[]> {
 
 export async function createUser(session: Creds, accessKey: string, secretKey: string): Promise<void> {
   assertNotFlag(accessKey, 'access key')
+  assertNotFlag(secretKey, 'secret key')
   await runMc(session, ['admin', 'user', 'add', ALIAS, accessKey, secretKey])
 }
 
