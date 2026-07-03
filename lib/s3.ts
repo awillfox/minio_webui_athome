@@ -1,4 +1,4 @@
-import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand, DeleteObjectCommand, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { config } from '@/lib/config'
 import { isAuthError } from '@/lib/errors'
@@ -47,6 +47,15 @@ export async function presignGet(creds: Creds, bucket: string, key: string): Pro
 
 export async function presignPut(creds: Creds, bucket: string, key: string, contentType?: string): Promise<string> {
   return getSignedUrl(publicClient(creds), new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }), { expiresIn: 300 })
+}
+
+export async function deleteObject(creds: Creds, bucket: string, key: string) {
+  await internalClient(creds).send(new DeleteObjectCommand({ Bucket: bucket, Key: key }))
+}
+
+export async function putEmptyFolder(creds: Creds, bucket: string, prefix: string, folderName: string) {
+  const key = prefix + folderName.replace(/\/+$/, '') + '/'
+  await internalClient(creds).send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: '' }))
 }
 
 export async function listObjects(creds: Creds, bucket: string, prefix: string, token?: string) {

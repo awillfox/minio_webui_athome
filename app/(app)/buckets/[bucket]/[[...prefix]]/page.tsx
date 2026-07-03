@@ -3,7 +3,7 @@ import { requireSession } from '@/lib/session'
 import { listObjects } from '@/lib/s3'
 import { toUserMessage } from '@/lib/errors'
 import { prefixFromSegments, breadcrumbs, displayName } from '@/lib/paths'
-import { ObjectRow, UploadButton } from './browser-client'
+import { ObjectRow, UploadButton, NewFolder } from './browser-client'
 
 export default async function ObjectBrowser({ params }: { params: Promise<{ bucket: string; prefix?: string[] }> }) {
   const { bucket: rawBucket, prefix: segs } = await params
@@ -32,7 +32,10 @@ export default async function ObjectBrowser({ params }: { params: Promise<{ buck
             </span>
           ))}
         </nav>
-        <UploadButton bucket={bucket} prefix={prefix} />
+        <div className="flex items-center gap-2">
+          <NewFolder bucket={bucket} prefix={prefix} />
+          <UploadButton bucket={bucket} prefix={prefix} />
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

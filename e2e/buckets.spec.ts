@@ -26,3 +26,24 @@ test('login, create and delete a bucket', async ({ page }) => {
   await page.locator('li', { hasText: name }).getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(name, { exact: true })).toHaveCount(0)
 })
+
+test('upload, download link, and delete an object', async ({ page }) => {
+  await loginUI(page)
+  const bucket = 'e2e-test-bucket-2'
+  if (!(await page.getByText(bucket, { exact: true }).count())) {
+    await page.fill('input[name=name]', bucket)
+    await page.getByRole('button', { name: 'Create bucket' }).click()
+    await expect(page.getByText(bucket, { exact: true })).toBeVisible()
+  }
+  await page.getByRole('link', { name: bucket }).click()
+  await expect(page).toHaveURL(new RegExp(`/buckets/${bucket}`))
+
+  const fileChooser = page.waitForEvent('filechooser')
+  await page.getByRole('button', { name: 'Upload file' }).click()
+  ;(await fileChooser).setFiles({ name: 'hello.txt', mimeType: 'text/plain', buffer: Buffer.from('hi') })
+  await expect(page.getByText('hello.txt')).toBeVisible()
+
+  page.on('dialog', (d) => d.accept())
+  await page.locator('li', { hasText: 'hello.txt' }).getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText('hello.txt')).toHaveCount(0)
+})
