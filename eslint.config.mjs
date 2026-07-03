@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // The `mc` CLI emits dynamic, loosely-typed JSON. Allow `any` at this
+    // external-CLI boundary (the mc driver and its typed admin wrappers)
+    // rather than threading casts through every field access.
+    files: ["lib/mc.ts", "lib/admin/**/*.ts"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
+  },
 ]);
 
 export default eslintConfig;
