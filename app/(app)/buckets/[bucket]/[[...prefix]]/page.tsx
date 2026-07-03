@@ -3,7 +3,7 @@ import { requireSession } from '@/lib/session'
 import { listObjects } from '@/lib/s3'
 import { toUserMessage } from '@/lib/errors'
 import { prefixFromSegments, breadcrumbs, displayName } from '@/lib/paths'
-import { ObjectRow } from './browser-client'
+import { ObjectRow, UploadButton } from './browser-client'
 
 export default async function ObjectBrowser({ params }: { params: Promise<{ bucket: string; prefix?: string[] }> }) {
   const { bucket: rawBucket, prefix: segs } = await params
@@ -23,14 +23,17 @@ export default async function ObjectBrowser({ params }: { params: Promise<{ buck
 
   return (
     <div className="space-y-4">
-      <nav className="flex flex-wrap items-center gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-        {crumbs.map((c, i) => (
-          <span key={c.href} className="flex items-center gap-1">
-            {i > 0 && <span>/</span>}
-            <Link href={c.href} className="hover:underline">{c.label}</Link>
-          </span>
-        ))}
-      </nav>
+      <div className="flex items-center justify-between">
+        <nav className="flex flex-wrap items-center gap-1 text-sm text-zinc-600 dark:text-zinc-400">
+          {crumbs.map((c, i) => (
+            <span key={c.href} className="flex items-center gap-1">
+              {i > 0 && <span>/</span>}
+              <Link href={c.href} className="hover:underline">{c.label}</Link>
+            </span>
+          ))}
+        </nav>
+        <UploadButton bucket={bucket} prefix={prefix} />
+      </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

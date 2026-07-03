@@ -1,4 +1,4 @@
-import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsV2Command, GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { config } from '@/lib/config'
 import { isAuthError } from '@/lib/errors'
@@ -43,6 +43,10 @@ export async function deleteBucket(creds: Creds, name: string) {
 
 export async function presignGet(creds: Creds, bucket: string, key: string): Promise<string> {
   return getSignedUrl(publicClient(creds), new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn: 300 })
+}
+
+export async function presignPut(creds: Creds, bucket: string, key: string, contentType?: string): Promise<string> {
+  return getSignedUrl(publicClient(creds), new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }), { expiresIn: 300 })
 }
 
 export async function listObjects(creds: Creds, bucket: string, prefix: string, token?: string) {

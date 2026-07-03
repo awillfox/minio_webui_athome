@@ -1,7 +1,42 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { useRef, useState } from 'react'
 import { displayName } from '@/lib/paths'
-import { downloadUrlAction } from './actions'
+import { downloadUrlAction, uploadUrlAction } from './actions'
+
+export function UploadButton({ bucket, prefix }: { bucket: string; prefix: string }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const router = useRouter()
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setBusy(true)
+    try {
+      const url = await uploadUrlAction(bucket, prefix, file.name, file.type || 'application/octet-stream')
+      const res = await fetch(url, { method: 'PUT', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } })
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`)
+      router.refresh()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Upload failed')
+    } finally {
+      setBusy(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  return (
+    <>
+      <input ref={inputRef} type="file" hidden onChange={onPick} />
+      <button disabled={busy} onClick={() => inputRef.current?.click()}
+        className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black">
+        {busy ? 'Uploading…' : 'Upload file'}
+      </button>
+    </>
+  )
+}
 
 type Obj = { key: string; size: number }
 
