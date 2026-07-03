@@ -23,9 +23,9 @@ export async function getServerInfo(session: Creds): Promise<ServerInfo> {
     onlineDisks: info.backend?.onlineDisks ?? 0,
     offlineDisks: info.backend?.offlineDisks ?? 0,
     servers: (info.servers ?? []).map((s: any) => ({
-      endpoint: s.endpoint, state: s.state, uptime: s.uptime ?? 0, version: s.version ?? '',
+      endpoint: s.endpoint ?? '', state: s.state ?? '', uptime: s.uptime ?? 0, version: s.version ?? '',
       drives: (s.drives ?? []).map((d: any) => ({
-        state: d.state, path: d.path, total: d.totalspace ?? 0, used: d.usedspace ?? 0, avail: d.availspace ?? 0,
+        state: d.state ?? '', path: d.path ?? '', total: d.totalspace ?? 0, used: d.usedspace ?? 0, avail: d.availspace ?? 0,
       })),
     })),
   }
