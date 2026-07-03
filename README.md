@@ -2,6 +2,8 @@
 
 A Next.js web console for MinIO — bucket browser, object browser with presigned upload/download, and an extensible shell for future admin features (access keys, users, policies, metrics).
 
+> **Disclaimer:** This is an unofficial personal project. It is **not affiliated with, endorsed by, or sponsored by MinIO, Inc.** "MinIO" is a trademark of MinIO, Inc.; it is used here only to describe the object-storage server this tool talks to. All trademarks are the property of their respective owners.
+
 ## Running locally
 
 Copy `.env.local.example` to `.env.local` and fill in:
