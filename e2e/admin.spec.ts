@@ -12,6 +12,13 @@ async function loginUI(page: Page) {
   await expect(page).toHaveURL(/\/buckets/)
 }
 
+test('view a built-in policy document', async ({ page }) => {
+  await loginUI(page)
+  await page.goto('/policies')
+  await page.locator('li', { hasText: 'readonly' }).getByRole('button', { name: 'View' }).click()
+  await expect(page.locator('pre')).toContainText('s3:GetObject')
+})
+
 test('create and delete an access key', async ({ page }) => {
   page.on('dialog', (d) => d.accept())
   await loginUI(page)

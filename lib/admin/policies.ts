@@ -1,0 +1,38 @@
+import { writeFile, unlink } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { runMc, ALIAS } from '@/lib/mc'
+import type { Creds } from '@/lib/session-crypto'
+
+export type Policy = { name: string; builtin: boolean }
+
+const BUILTINS = new Set(['consoleAdmin', 'diagnostics', 'readonly', 'readwrite', 'writeonly'])
+
+export async function listPolicies(session: Creds): Promise<Policy[]> {
+  const lines = await runMc(session, ['admin', 'policy', 'ls', ALIAS])
+  return lines.map((l) => ({ name: l.policy, builtin: BUILTINS.has(l.policy) }))
+}
+
+export async function getPolicy(session: Creds, name: string): Promise<unknown> {
+  const [res] = await runMc(session, ['admin', 'policy', 'info', ALIAS, name])
+  return res.policyInfo?.Policy ?? null
+}
+
+export async function createPolicy(session: Creds, name: string, document: string): Promise<void> {
+  // mc admin policy create needs the document in a file. Use a unique temp file per call.
+  const file = join(tmpdir(), `mw-policy-${encodeURIComponent(name)}-${process.pid}.json`)
+  await writeFile(file, document, 'utf8')
+  try {
+    await runMc(session, ['admin', 'policy', 'create', ALIAS, name, file])
+  } finally {
+    await unlink(file).catch(() => {})
+  }
+}
+
+export async function attachPolicy(session: Creds, user: string, policy: string): Promise<void> {
+  await runMc(session, ['admin', 'policy', 'attach', ALIAS, policy, '--user', user])
+}
+
+export async function detachPolicy(session: Creds, user: string, policy: string): Promise<void> {
+  await runMc(session, ['admin', 'policy', 'detach', ALIAS, policy, '--user', user])
+}
