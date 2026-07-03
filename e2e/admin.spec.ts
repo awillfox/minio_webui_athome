@@ -34,3 +34,21 @@ test('create and delete an access key', async ({ page }) => {
   await page.locator('li', { hasText: ak }).getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByText(ak, { exact: false })).toHaveCount(0)
 })
+
+test('create, disable, and delete a user', async ({ page }) => {
+  page.on('dialog', (d) => d.accept())
+  await loginUI(page)
+  await page.goto('/users')
+  const uname = 'e2e-probe-user'
+  if (await page.getByText(uname, { exact: true }).count()) {
+    await page.locator('li', { hasText: uname }).getByRole('button', { name: 'Delete' }).click()
+  }
+  await page.fill('input[name=accessKey]', uname)
+  await page.fill('input[name=secretKey]', 'e2e-secret-123')
+  await page.getByRole('button', { name: 'Create user' }).click()
+  await expect(page.getByText(uname, { exact: true })).toBeVisible()
+  await page.locator('li', { hasText: uname }).getByRole('button', { name: 'Disable' }).click()
+  await expect(page.locator('li', { hasText: uname })).toContainText('disabled')
+  await page.locator('li', { hasText: uname }).getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText(uname, { exact: true })).toHaveCount(0)
+})
