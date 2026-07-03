@@ -59,8 +59,8 @@ The Access Keys, Users, Policies, and Metrics pages shell out to the [MinIO Clie
 
 ```
 Browser ──HTTPS──▶ Next.js (app router, adapter-node)
-                     └─ /api/[...path] proxy (injects session creds)
-                          └─▶ MinIO (internal endpoint, SDK)
+                     └─ Server Actions (requireSession guard)
+                          └─▶ MinIO (internal endpoint) via S3 SDK / mc subprocess
                      └─ presigned URL redirect
                           └─▶ MinIO (public endpoint, browser direct)
 ```
