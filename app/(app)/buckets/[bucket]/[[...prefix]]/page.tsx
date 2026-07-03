@@ -3,6 +3,7 @@ import { requireSession } from '@/lib/session'
 import { listObjects } from '@/lib/s3'
 import { toUserMessage } from '@/lib/errors'
 import { prefixFromSegments, breadcrumbs, displayName } from '@/lib/paths'
+import { ObjectRow } from './browser-client'
 
 export default async function ObjectBrowser({ params }: { params: Promise<{ bucket: string; prefix?: string[] }> }) {
   const { bucket: rawBucket, prefix: segs } = await params
@@ -43,10 +44,7 @@ export default async function ObjectBrowser({ params }: { params: Promise<{ buck
           </li>
         ))}
         {data?.objects.map((o) => (
-          <li key={o.key} className="flex items-center justify-between px-4 py-3">
-            <span className="text-zinc-800 dark:text-zinc-200">📄 {displayName(o.key, prefix)}</span>
-            <span className="text-xs text-zinc-500">{o.size} B</span>
-          </li>
+          <ObjectRow key={o.key} bucket={bucket} prefix={prefix} obj={o} />
         ))}
         {data && data.folders.length === 0 && data.objects.length === 0 && (
           <li className="px-4 py-6 text-sm text-zinc-500">This folder is empty.</li>
