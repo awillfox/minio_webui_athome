@@ -14,7 +14,7 @@ export type ServerInfo = {
 
 export async function getServerInfo(session: Creds): Promise<ServerInfo> {
   const [res] = await runMc(session, ['admin', 'info', ALIAS])
-  const info = res.info ?? {}
+  const info = res?.info ?? {}
   return {
     mode: info.mode ?? 'unknown',
     buckets: info.buckets?.count ?? 0,

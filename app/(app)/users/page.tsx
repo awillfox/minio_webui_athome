@@ -11,9 +11,13 @@ export default async function UsersPage() {
   let error: string | null = null
   try {
     users = await listUsers(session)
-    policies = (await listPolicies(session)).map((p) => p.name)
   } catch (err) {
     error = toUserMessage(err)
+  }
+  try {
+    policies = (await listPolicies(session)).map((p) => p.name)
+  } catch {
+    // AccessDenied or unreachable — render without attach-policy dropdown
   }
 
   return (

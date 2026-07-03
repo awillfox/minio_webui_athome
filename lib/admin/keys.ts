@@ -1,5 +1,6 @@
 import { runMc, ALIAS } from '@/lib/mc'
 import type { Creds } from '@/lib/session-crypto'
+import { assertNotFlag } from './guard'
 
 export type AccessKey = { accessKey: string; parentUser: string; status: string; expiration: string }
 
@@ -21,9 +22,11 @@ export async function listAccessKeys(session: Creds): Promise<AccessKey[]> {
 
 export async function createAccessKey(session: Creds): Promise<{ accessKey: string; secretKey: string }> {
   const [res] = await runMc(session, ['admin', 'accesskey', 'create', ALIAS])
+  if (!res) throw new Error('mc returned no access key')
   return { accessKey: res.accessKey, secretKey: res.secretKey }
 }
 
 export async function deleteAccessKey(session: Creds, accessKey: string): Promise<void> {
+  assertNotFlag(accessKey, 'access key')
   await runMc(session, ['admin', 'accesskey', 'rm', ALIAS, accessKey])
 }
