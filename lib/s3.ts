@@ -1,4 +1,4 @@
-import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand } from '@aws-sdk/client-s3'
+import { S3Client, ListBucketsCommand, CreateBucketCommand, DeleteBucketCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import { config } from '@/lib/config'
 import { isAuthError } from '@/lib/errors'
 import type { Creds } from '@/lib/session-crypto'
@@ -38,4 +38,19 @@ export async function createBucket(creds: Creds, name: string) {
 
 export async function deleteBucket(creds: Creds, name: string) {
   await internalClient(creds).send(new DeleteBucketCommand({ Bucket: name }))
+}
+
+export async function listObjects(creds: Creds, bucket: string, prefix: string, token?: string) {
+  const out = await internalClient(creds).send(new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: prefix,
+    Delimiter: '/',
+    ContinuationToken: token,
+    MaxKeys: 200,
+  }))
+  const folders = (out.CommonPrefixes ?? []).map((p) => p.Prefix!).filter(Boolean)
+  const objects = (out.Contents ?? [])
+    .filter((o) => o.Key !== prefix) // drop the folder placeholder itself
+    .map((o) => ({ key: o.Key!, size: o.Size ?? 0, lastModified: o.LastModified }))
+  return { folders, objects, nextToken: out.NextContinuationToken }
 }
